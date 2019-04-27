@@ -26,7 +26,7 @@ class KMeansCluster:
             init_clt_centers.append(X[index])
             
         # Start clustering progress
-        self.clustering_progress(X=X, clt_centers=init_clt_centers)
+        return self.clustering_progress(X=X, clt_centers=init_clt_centers)
         
     def clustering_progress(self, X, clt_centers):
         is_under_threshold = False
@@ -39,7 +39,7 @@ class KMeansCluster:
             new_clt_centers = self.calculate_new_clt_centers(clt_centers)
             is_under_threshold = self.check_distance_change_threshold(clt_centers, new_clt_centers)
             clt_centers = new_clt_centers
-        print(self.X_w_index)
+        return [row[self.k_value] for row in self.X_w_index]
 
     def calculate_objective_function_value(self, clt_centers):
         group_difference = [0] * len(clt_centers)
@@ -103,7 +103,7 @@ class KMeansCluster:
         rand_nums = []
         for i in range(n):
             while True:
-                num = random.randint(0, upper_range)
+                num = random.randint(0, upper_range-1)
                 if num not in rand_nums:
                     rand_nums.append(num)
                     break
@@ -111,34 +111,6 @@ class KMeansCluster:
                  
     def square_of_distance(self, point_1, point_2):
         return pow(self.euclidean_distance(point_1,point_2),2)
+        
 
-    def plot_data(self, clt_centers, count):
-        # Create color maps
-        
-        cmap_bold = ListedColormap(['#9400D3', '#4B0082', '#00FF00', '#0000FF', '#FFFF00','#FF7F00','#FF0000','#A9A9A9'])
-
-        x_min, x_max = min([row[0] for row in self.X_w_index]) - 1, max([row[0] for row in self.X_w_index]) + 1
-        y_min, y_max = min([row[1] for row in self.X_w_index]) - 1, max([row[1] for row in self.X_w_index]) + 1
-    
-        plt.figure(count)
-        
-        
-        plt.scatter([row[0] for row in self.X_w_index], [row[1] for row in self.X_w_index], c=[row[2] for row in self.X_w_index], cmap=cmap_bold, s=0.3)
-        plt.scatter([row[0] for row in clt_centers], [row[1] for row in clt_centers], c='#000000')
-
-        plt.xlim(x_min, x_max)
-        plt.ylim(y_min, y_max)
-        plt.title("k=%i\n%i. Iteration" % (self.k_value, count))
-        plt.xlabel("x1", fontsize=8)
-        plt.ylabel("x2", fontsize=8)
-        
-    def plot_objective_function(self, values, iteration_count):
-        x = list(range(1, iteration_count))
-        plt.figure(iteration_count)
-        plt.ylabel("Objective Function Value", fontsize=8)
-        plt.xlabel("Iteration", fontsize=8)
-        plt.title("Objective Function")
-        plt.ticklabel_format(style='plain',axis='x',useOffset=False)
-        
-        plt.plot(x, values, '--bo')
         

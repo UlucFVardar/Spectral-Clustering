@@ -1,8 +1,11 @@
 from KNeighbors import KNeighbors
 import numpy as np
 from sklearn.preprocessing import normalize
-from scipy.linalg import eigh
+import scipy
 from KMeansCluster import KMeansCluster
+import numpy
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
 class SpectralCluster:
     def __init__(self, clusters_number):
@@ -12,17 +15,17 @@ class SpectralCluster:
         adjacency_matrix = self.generate_adjacency_matrix(X=X)
         laplacian_matrix = self.generate_laplacian_matrix(adjacency_matrix=adjacency_matrix)
         laplacian_matrix = self.normalize_matrix(matrix=laplacian_matrix)
-        eigenvectors = self.find_first_k_eigen_values_vectors(matrix=laplacian_matrix)
-        feature_matrix = self.generate_feature_matrix(vectors=eigenvectors)
-        counter = 0
-        for i in feature_matrix:
-            if i[0] == 0 and i[1] == 0 and i[2] == 0:
-                counter =counter + 1
-        print ("feature vector empty = " + str(counter))
-        clt = KMeansCluster(cluster_number=self.k_value)
-        clt.fit(X=feature_matrix)
-        
 
+        feature_matrix = self.find_first_k_eigen_values_vectors(matrix=laplacian_matrix)
+        
+        # Create KMeans Cluster and start clustering process on feature matrix
+        clt = KMeansCluster(cluster_number=self.k_value)
+        labels = clt.fit(X=feature_matrix)
+
+        # Merge data and labels and plot
+        X = list(zip(X,labels))
+        self.plot_data(X=X)
+        
     def generate_adjacency_matrix(self, X):
         adjacency_matrix = [ [0] * len(X) for _ in range(len(X))]
         neighbors_finder = KNeighbors(n_neighbors=self.k_value)
@@ -54,12 +57,12 @@ class SpectralCluster:
 
     def find_first_k_eigen_values_vectors(self, matrix):
         tmp_arr = np.asarray(matrix)
-        eigenvalue, eigenvectors = eigh(matrix)
-        eigenvalue_list = eigenvalue.tolist()
-        eigenvectors_list = eigenvectors.tolist()
-        result_list = list(zip(eigenvalue_list,eigenvectors_list))
-        result_list = sorted(result_list, key=lambda a_entry: a_entry[0], reverse=False)[:self.k_value]
-        return [row[1] for row in result_list]
+        tmp_arr = tmp_arr.astype(float)
+        eig_val, eig_vect = scipy.sparse.linalg.eigs(tmp_arr, self.k_value)
+        X = eig_vect.real
+        rows_norm = numpy.linalg.norm(X, axis=1, ord=2)
+        Y = (X.T / rows_norm).T
+        return Y.tolist()
 
     def normalize_matrix(self, matrix):
         normalized = normalize(matrix, norm='l1', axis=1)
@@ -68,3 +71,19 @@ class SpectralCluster:
     def generate_feature_matrix(self, vectors):
         feature_array = np.column_stack(vectors)
         return feature_array.tolist()
+
+    def plot_data(self, X):
+        # Create color maps
+        cmap_bold = ListedColormap(['#9400D3', '#4B0082', '#00FF00', '#0000FF', '#FFFF00','#FF7F00','#FF0000','#A9A9A9'])
+
+        x_min, x_max = min([row[0][0] for row in X]) - 1, max([row[0][0] for row in X]) + 1
+        y_min, y_max = min([row[0][1] for row in X]) - 1, max([row[0][1] for row in X]) + 1
+        
+        plt.scatter([row[0][0] for row in X], [row[0][1] for row in X], c=[row[1] for row in X], cmap=cmap_bold, s=0.3)
+
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        #plt.title("k=%i\n%i. Iteration" % (self.k_value, count))
+        plt.xlabel("x1", fontsize=8)
+        plt.ylabel("x2", fontsize=8)
+        plt.show()

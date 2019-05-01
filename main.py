@@ -38,7 +38,7 @@ def main():
     # Load dataset with given txt file
     X = load_dataset(txt_name="toy_dataset1.txt")
     # Plot initial dataset
-    plot_dataset(X)
+    #plot_dataset(X)
 
     # Create cluster object with clusters_number and start clustering process
     clt = SpectralCluster(clusters_number=3)

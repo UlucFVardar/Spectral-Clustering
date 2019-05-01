@@ -1,8 +1,6 @@
 import random
 import copy
 import math
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
 from scipy.spatial import distance
 
 
@@ -34,12 +32,12 @@ class KMeansCluster:
             count = 0
             for point in X:
                 # set point to correct group index
-                self.X_w_index[count][self.k_value] = self.find_nearest_clt_centers(point, clt_centers)
+                self.X_w_index[count][self.k_value - 1] = self.find_nearest_clt_centers(point, clt_centers)
                 count += 1 
             new_clt_centers = self.calculate_new_clt_centers(clt_centers)
             is_under_threshold = self.check_distance_change_threshold(clt_centers, new_clt_centers)
             clt_centers = new_clt_centers
-        return [row[self.k_value] for row in self.X_w_index]
+        return [row[self.k_value - 1] for row in self.X_w_index]
 
     def calculate_objective_function_value(self, clt_centers):
         group_difference = [0] * len(clt_centers)
@@ -53,18 +51,22 @@ class KMeansCluster:
         return result
 
     def calculate_new_clt_centers(self, clt_centers):
-        total_values = [ [0] * len(clt_centers) for _ in range(self.k_value)]
+        total_values = [ [0] * (self.k_value-1) for _ in range(len(clt_centers))]
         group_element_count = [0] * len(clt_centers)
         new_clt_centers = [0] * len(clt_centers)
+        
         count = 0
         for point in self.X_w_index:
-            group_element_count[point[self.k_value]] += 1
+            group_element_count[point[self.k_value -1]] += 1
             for i in range(len(point)-1):
-                total_values[point[self.k_value]][i] = total_values[point[self.k_value]][i] + point[i]
+                total_values[point[self.k_value-1]][i] = total_values[point[self.k_value-1]][i] + point[i]
             
         
         for values in total_values:
-            new_clt_centers[count] = [x / group_element_count[count] for x in values]
+            if group_element_count[count] != 0:
+                new_clt_centers[count] = [x / group_element_count[count] for x in values]
+            else:
+                new_clt_centers[count] = [x / 1 for x in values]
             count += 1
         return new_clt_centers
             
@@ -91,7 +93,7 @@ class KMeansCluster:
             distances.append(self.euclidean_distance(x_1=f_center, x_2=last_clt_centers[count]))
             count += 1
         for distance in distances:
-            if distance < 0.0001:
+            if distance < 0.00000001:
                 return True
         return False
 

@@ -34,6 +34,7 @@ class KMeansCluster:
                 # set point to correct group index
                 self.X_w_index[count][self.k_value - 1] = self.find_nearest_clt_centers(point, clt_centers)
                 count += 1 
+            print(self.calculate_objective_function_value(clt_centers))
             new_clt_centers = self.calculate_new_clt_centers(clt_centers)
             is_under_threshold = self.check_distance_change_threshold(clt_centers, new_clt_centers)
             clt_centers = new_clt_centers
@@ -43,7 +44,7 @@ class KMeansCluster:
         group_difference = [0] * len(clt_centers)
         result = 0
         for point in self.X_w_index:
-            group_difference[point[2]] = group_difference[point[2]] + self.square_of_distance([point[0],point[1]],clt_centers[point[2]])
+            group_difference[point[self.k_value-1]] = group_difference[point[self.k_value-1]] + self.square_of_distance(point[:self.k_value-1],clt_centers[point[self.k_value-1]])
         
         for diff in group_difference:
             result += diff
@@ -93,7 +94,7 @@ class KMeansCluster:
             distances.append(self.euclidean_distance(x_1=f_center, x_2=last_clt_centers[count]))
             count += 1
         for distance in distances:
-            if distance < 0.00000001:
+            if distance < 0.0000000000000000000001:
                 return True
         return False
 

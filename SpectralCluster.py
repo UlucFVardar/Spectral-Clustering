@@ -87,8 +87,8 @@ class SpectralCluster:
         # Create color maps
         cmap_bold = ListedColormap(['#00FF00', '#FFFF00','#A9A9A9','#0000FF', '#4B0082', '#9400D3','#FF0000','#FF7F00'])
 
-        x_min, x_max = min([row[0][0] for row in X]) - 1, max([row[0][0] for row in X]) + 1
-        y_min, y_max = min([row[0][1] for row in X]) - 1, max([row[0][1] for row in X]) + 1
+        x_min, x_max = min([row[0][0] for row in X]) - 0.1, max([row[0][0] for row in X]) + 0.1
+        y_min, y_max = min([row[0][1] for row in X]) - 0.1, max([row[0][1] for row in X]) + 0.1
         
         plt.scatter([row[0][0] for row in X], [row[0][1] for row in X], c=[row[1] for row in X], cmap=cmap_bold, s=15)
 
